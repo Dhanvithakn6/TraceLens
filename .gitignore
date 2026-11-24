@@ -1,3 +1,5 @@
+# PowerShell cache
+/Microsoft/
 # Environment variables and secrets
 .env
 .env.*
