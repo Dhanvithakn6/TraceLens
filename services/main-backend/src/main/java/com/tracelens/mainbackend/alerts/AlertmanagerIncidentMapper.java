@@ -34,11 +34,11 @@ public class AlertmanagerIncidentMapper {
             throw invalid("Alert label 'alertname' is required");
         }
 
-        if (status.equals("resolved")) {
-            return new MappedAlert(status, null);
-        }
-
-        Instant occurredAt = alert.startsAt() == null ? Instant.now() : alert.startsAt();
+        Instant occurredAt = status.equals("firing")
+                ? alert.startsAt() == null ? Instant.now() : alert.startsAt()
+                : alert.endsAt() != null
+                        ? alert.endsAt()
+                        : alert.startsAt() == null ? Instant.now() : alert.startsAt();
         String serviceName = firstNonBlank(labels.get("service"), labels.get("service_name"), labels.get("job"));
         if (serviceName == null) {
             serviceName = "unknown";
@@ -50,12 +50,13 @@ public class AlertmanagerIncidentMapper {
         String incidentIdentity = "tracelens-alert:" + identity + ":"
                 + (alert.startsAt() == null ? "unknown-start" : alert.startsAt());
         UUID incidentId = stableUuid(incidentIdentity);
-        UUID eventId = stableUuid(incidentId + ":INCIDENT_DETECTED");
+        String eventType = status.equals("firing") ? "INCIDENT_DETECTED" : "INCIDENT_RESOLVED";
+        UUID eventId = stableUuid(incidentId + ":" + eventType);
 
         return new MappedAlert(status, new IncidentEvent(
                 eventId,
                 incidentId,
-                "INCIDENT_DETECTED",
+                eventType,
                 serviceName,
                 severity,
                 description,

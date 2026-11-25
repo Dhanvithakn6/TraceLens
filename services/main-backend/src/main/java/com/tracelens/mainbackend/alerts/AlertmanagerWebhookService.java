@@ -31,7 +31,7 @@ public class AlertmanagerWebhookService {
         int resolvedCount = mapped.size() - firing.size();
 
         try {
-            for (AlertmanagerIncidentMapper.MappedAlert alert : firing) {
+            for (AlertmanagerIncidentMapper.MappedAlert alert : mapped) {
                 eventProducer.publish(alert.event()).join();
             }
         } catch (RuntimeException exception) {
