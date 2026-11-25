@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracelens.dev/schemas/incident-event.schema.json",
+  "title": "TraceLens Incident Event",
+  "description": "An incident lifecycle event published by TraceLens services.",
+  "type": "object",
+  "required": [
+    "eventId",
+    "incidentId",
+    "eventType",
+    "serviceName",
+    "severity",
+    "description",
+    "occurredAt"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this event."
+    },
+    "incidentId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identifier shared by all events in an incident lifecycle."
+    },
+    "eventType": {
+      "type": "string",
+      "description": "Lifecycle event type, such as INCIDENT_DETECTED, INCIDENT_UPDATED, or INCIDENT_RESOLVED."
+    },
+    "serviceName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the affected service."
+    },
+    "severity": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Incident severity, such as LOW, MEDIUM, HIGH, or CRITICAL."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable summary of the incident event."
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time the event occurred, represented as an ISO 8601 timestamp."
+    }
+  }
+}

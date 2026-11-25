@@ -1,0 +1,40 @@
+groups:
+  - name: tracelens-http
+    rules:
+      - alert: TraceLensServiceUnavailable
+        expr: up{job=~"user-service|order-service|payment-service|main-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "TraceLens service is unavailable: {{ $labels.job }}"
+          description: "Prometheus cannot scrape {{ $labels.instance }} for at least one minute."
+
+      - alert: TraceLensHighHttp5xxRate
+        expr: |
+          (
+            sum by (job, instance) (rate(http_server_requests_seconds_count{job=~"user-service|order-service|payment-service|main-backend", status=~"5.."}[5m]))
+            /
+            sum by (job, instance) (rate(http_server_requests_seconds_count{job=~"user-service|order-service|payment-service|main-backend"}[5m]))
+          ) > 0.05
+          and
+          sum by (job, instance) (rate(http_server_requests_seconds_count{job=~"user-service|order-service|payment-service|main-backend"}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP 5xx rate: {{ $labels.job }}"
+          description: "More than 5% of requests are 5xx responses, with at least 0.1 requests per second over five minutes."
+
+      - alert: TraceLensHighAverageHttpLatency
+        expr: |
+          sum by (job, instance) (rate(http_server_requests_seconds_sum{job=~"user-service|order-service|payment-service|main-backend"}[5m]))
+          /
+          sum by (job, instance) (rate(http_server_requests_seconds_count{job=~"user-service|order-service|payment-service|main-backend"}[5m]))
+          > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High average HTTP latency: {{ $labels.job }}"
+          description: "Average request latency exceeded one second over five minutes."

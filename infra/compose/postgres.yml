@@ -1,0 +1,23 @@
+name: tracelens-postgres
+
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: ${TRACELENS_DB_NAME:-tracelens}
+      POSTGRES_USER: ${TRACELENS_DB_USERNAME:?Set TRACELENS_DB_USERNAME outside source control}
+      POSTGRES_PASSWORD: ${TRACELENS_DB_PASSWORD:?Set TRACELENS_DB_PASSWORD outside source control}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 1g
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
