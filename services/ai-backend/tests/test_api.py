@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -8,6 +9,14 @@ from app.main import app
 class InvestigationApiTests(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
+        self.metrics_patch = patch(
+            "app.agents.workflow.prometheus_client.get_service_metrics",
+            return_value=[],
+        )
+        self.metrics_patch.start()
+
+    def tearDown(self):
+        self.metrics_patch.stop()
 
     def test_create_investigation_returns_structured_state(self):
         payload = {

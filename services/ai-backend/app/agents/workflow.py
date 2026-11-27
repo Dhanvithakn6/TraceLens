@@ -4,17 +4,21 @@ from langgraph.graph import END, StateGraph
 from langgraph.types import RunnableConfig
 
 from app.agents.state import InvestigationState
+from app.integrations.prometheus import prometheus_client
 
 
 def investigate(state: InvestigationState) -> dict[str, object]:
-    """Pass through the supplied incident context without asserting findings.
+    """Collect available service metrics without asserting findings.
 
-    This node is the integration point for future telemetry retrieval and
-    analysis steps. Until those integrations exist, it deliberately leaves
-    state unchanged.
+    Prometheus is queried only when the incident contains a service name.
+    Other telemetry and analysis fields remain untouched for future nodes.
     """
 
-    return {}
+    incident_details = state.get("incident_details", {})
+    service_name = incident_details.get("service_name")
+    if not service_name:
+        return {}
+    return {"metrics": prometheus_client.get_service_metrics(str(service_name))}
 
 
 def build_investigation_graph():

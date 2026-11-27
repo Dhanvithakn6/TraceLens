@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from app.agents.workflow import investigation_graph, run_investigation
 
@@ -21,6 +22,21 @@ class InvestigationWorkflowTests(unittest.TestCase):
         initial_state = {"incident_details": {"id": "incident-2"}}
 
         self.assertEqual(run_investigation(initial_state), initial_state)
+
+    @patch("app.agents.workflow.prometheus_client.get_service_metrics")
+    def test_workflow_populates_metrics_for_incident_service(self, get_metrics):
+        get_metrics.return_value = [
+            {"name": "request_rate", "value": 2.5, "unit": "requests/second"}
+        ]
+        initial_state = {
+            "incident_details": {"service_name": "checkout"},
+            "metrics": [],
+        }
+
+        result = run_investigation(initial_state)
+
+        get_metrics.assert_called_once_with("checkout")
+        self.assertEqual(result["metrics"], get_metrics.return_value)
 
 
 if __name__ == "__main__":
