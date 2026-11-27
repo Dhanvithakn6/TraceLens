@@ -1,3 +1,13 @@
+# Python virtual environment
+.venv/
+venv/
+**/.venv/
+**/venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
 # PowerShell cache
 /Microsoft/
 # Environment variables and secrets
